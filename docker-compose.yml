@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+
+  db:
+    image: mariadb:10.4
+    volumes:
+      - /var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+    ports:
+      - ${MYSQL_SERVICE_PORT}:3306
+
+  p:
+    image: project-p
+    build: .
+    command: [ "flask", "run", "--host=0.0.0.0"]
+    volumes:
+      - ./:/usr/src/project-p
+      - /usr/src/project-p/.cache
+      - /usr/src/project-p/node_modules
+      - /usr/src/project-p/venv
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+      - SECRET_KEY
+      - FLASK_APP
+      - FLASK_ENV
+      - DEBUG
+      - TESTING
+    ports:
+      - ${P_SERVICE_PORT}:5000
+    depends_on:
+      - db
